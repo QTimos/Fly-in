@@ -1,50 +1,62 @@
-#• The first line defines the number of drones using nb_drones: <number>.
-#
-#• Zone definition on each line using type prefixes:
-#    ◦ start_hub: <name> <x> <y> [metadata] marks the starting zone.
-#    ◦ end_hub: <name> <x> <y> [metadata] marks the end zone.
-#    ◦ hub: <name> <x> <y> [metadata] defines a regular zone.
-#    ◦ The connection syntax forbids dashes in zone names (see below).
-#
-#• All metadata is optional and enclosed in brackets [...] with default values:
-#    ◦ zone=<type> (default: normal)
-#    ◦ color=<value> (default: none)
-#    ◦ max_drones=<number> (default: 1) - Maximum drones that can occupy this
-#    zone simultaneously
-#    ◦ Tags inside brackets can appear in any order.
-#
-#• Zone types:
-#    ◦ normal – Standard zone with 1 turn movement cost (default)
-#    ◦ blocked – Inaccessible zone. Drones must not enter or pass through this zone.
-#    Any path using it is invalid.
-#    ◦ restricted – A sensitive or dangerous zone. Movement to this zone costs 2
-#    turns.
-#    ◦ priority – A preferred zone. Movement to this zone costs 1 turn but should
-#    be prioritized in pathfinding.
-#
-#• Colors:
-#    ◦ Colors are optional and can be used for visual representation (terminal output
-#    or graphical display).
-#    ◦ Accepted values for color are any valid single-word strings (e.g., red, blue,
-#    gray). There is no fixed list of allowed colors.
-#    ◦ When colors are specified, the implementation should provide visual feedback
-#    through colored terminal output or graphical representation.
-#
-#• Connections are defined using connection: <name1>-<name2> [metadata]:
-#    ◦ Define a bidirectional connection (edge) between two zones.
-#    ◦ The connection syntax forbids dashes in zone names.
-#    ◦ Optional metadata can be specified in brackets [...]:
-#
-#∗ max_link_capacity=<number> (default: 1) - Maximum drones that can
-#traverse this connection simultaneously
-#
-#• Comments start with ’#’ and are ignored.
-#The zones coordinates will always be integers, and there will always
-#be a unique start and a unique end zone.
+from typing import Optional
+from enum import Enum
+
+class ZoneType(str, Enum):
+    NORMAL     = "normal"
+    BLOCKED    = "blocked"
+    RESTRICTED = "restricted"
+    PRIORITY   = "priority"
+
+
+class Hub:
+    def __init__(self, name: str, x: int, y: int, zone: ZoneType = ZoneType.NORMAL,
+                 color: Optional[str] = None, max_drones: int = 1) -> None:
+        self.name       = name
+        self.x          = x
+        self.y          = y
+        self.zone       = zone
+        self.color      = color
+        self.max_drones = max_drones
+
+    def __str__(self) -> str:
+        return (
+                "{\n"
+                f"  {self.name}\n"
+                f"  {self.x}\n"
+                f"  {self.y}\n"
+                f"  {self.zone}\n"
+                f"  {self.color}\n"
+                f"  {self.max_drones}\n"
+                "}\n"
+                )
+
+
+class Connection:
+    def __init__(self, a: str, b: str, max_link_capacity: int = 1) -> None:
+        self.a                 = a
+        self.b                 = b
+        self.max_link_capacity = max_link_capacity
+
+    def __str__(self) -> str:
+        return (
+                "{\n"
+                f"  {self.a}\n"
+                f"  {self.b}\n"
+                f"  {self.max_link_capacity}\n"
+                "}\n"
+                )
+
+
+def test_parsing() -> None:
+    from parse import FileParser
+    file_path = "01_linear_path.txt"
+    with open(file_path) as file:
+        parser = FileParser(file)
+        config = parser.parse()
+        print(config)
 
 def main() -> None:
     pass
 
-
 if __name__ == "__main__":
-    main()
+    test_parsing()
